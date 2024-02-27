@@ -1,5 +1,7 @@
 import { LocalStorage } from "@raycast/api";
 import moment from "moment";
+import net from "net";
+import exec from "child_process";
 
 export const fetchResources = async () => {
   try {
@@ -26,9 +28,9 @@ export const updateResourceList = async (resource, index) => {
   }
 
   if (typeof index === "number") {
-    resources[index] = resource; 
+    resources[index] = resource;
   } else {
-    resources.push(resource); 
+    resources.push(resource);
   }
 
   await LocalStorage.setItem("resources", JSON.stringify(resources));
@@ -40,7 +42,6 @@ export const deleteResource = async (resource) => {
   await LocalStorage.setItem("resources", JSON.stringify(newResources));
 };
 
-const net = require("net");
 export const isHostAvailable = async (resource) => {
   return new Promise((resolve) => {
     const { url, port } = resource;
@@ -66,8 +67,6 @@ export const isHostAvailable = async (resource) => {
     });
   });
 };
-
-const { exec } = require("child_process");
 
 /**
  * Plays a sound file.
@@ -124,9 +123,9 @@ export const generateChartUrl = (statusHistory) => {
             display: true,
           },
           ticks: {
-            color: "white", 
+            color: "white",
             display: false,
-          }
+          },
         },
         x: {
           beginAtZero: true,
@@ -134,9 +133,9 @@ export const generateChartUrl = (statusHistory) => {
             display: true,
           },
           ticks: {
-            color: "black", 
+            color: "black",
             display: true,
-          }
+          },
         },
       },
       plugins: {
@@ -148,13 +147,11 @@ export const generateChartUrl = (statusHistory) => {
             font: {
               weight: "bold",
               size: 16,
-            }
+            },
           },
         },
       },
     },
-
-
   };
 
   const chartUrl = `https://quickchart.io/chart?c=${encodeURIComponent(JSON.stringify(chartConfig))}&width=500&height=350&v=4&bkg=rgba(200,200,200,0.9)`;

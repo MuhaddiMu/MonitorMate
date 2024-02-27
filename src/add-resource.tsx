@@ -19,8 +19,8 @@ interface Props {
   };
 }
 
-export default function AddResource(props) {
-  const resource: Resource = props?.launchContext?.resource;
+export default function AddResource(props: Props) {
+  const resource: Resource = props?.launchContext?.resource || { url: "", type: "", port: "", statusHistory: [] };
   const index = props?.launchContext?.index;
 
   const [url, setURL] = useState(resource?.url || "");
@@ -84,10 +84,9 @@ export default function AddResource(props) {
 
     if (!valid) return;
 
-
     const newResource: Resource = { url, type, port, statusHistory: [] };
 
-    const isHostUp = await isHostAvailable(newResource) as { status: boolean; lastChecked: string}
+    const isHostUp = (await isHostAvailable(newResource)) as { status: boolean; lastChecked: string };
 
     newResource.status = isHostUp.status;
     newResource.lastChecked = isHostUp.lastChecked;
@@ -144,9 +143,9 @@ export default function AddResource(props) {
       />
 
       <Form.Dropdown id="resourceType" title="Resource Type" value={type} onChange={setType}>
-      {Object.entries(commonPortsAndProtocols).map(([key]) => (
-        <Form.Dropdown.Item key={key} value={key} title={key} />
-      ))}
+        {Object.entries(commonPortsAndProtocols).map(([key]) => (
+          <Form.Dropdown.Item key={key} value={key} title={key} />
+        ))}
         <Form.Dropdown.Item value="other" title="Other" />
       </Form.Dropdown>
 

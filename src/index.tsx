@@ -60,7 +60,7 @@ export default function Command() {
       const chartUrl = generateChartUrl(selectedResource.statusHistory);
       return `## Resource ${selectedResource.url}` + `![Chart](${chartUrl})`;
     }
-    return '';
+    return "";
   }, [selectedResource]);
 
   if (isDetailsOpen && selectedResource) {
@@ -97,7 +97,11 @@ export default function Command() {
         actions={
           <ActionPanel>
             <Action icon={Icon.XMarkCircleFilled} title="Close" onAction={closeDetails} />
-            <Action icon={Icon.Pencil} title="Edit" onAction={() => handleEdit(selectedResource, resources.indexOf(selectedResource))} />
+            <Action
+              icon={Icon.Pencil}
+              title="Edit"
+              onAction={() => handleEdit(selectedResource, resources.indexOf(selectedResource))}
+            />
             <Action icon={Icon.Trash} title="Delete" onAction={() => handleDelete(selectedResource)} />
           </ActionPanel>
         }

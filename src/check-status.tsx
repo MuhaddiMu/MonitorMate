@@ -26,7 +26,7 @@ export default async function checkStatus(LaunchProps: LaunchProps) {
       console.log(`Checking resource: ${resource.url}`);
 
       try {
-        const statusResult = await isHostAvailable(resource) as StatusResult;
+        const statusResult = (await isHostAvailable(resource)) as StatusResult;
 
         let updatedStatusHistory = [
           ...resource.statusHistory,
