@@ -54,12 +54,9 @@ export default function Command() {
     const chartUrl = generateChartUrl(selectedResource.statusHistory);
     const markdown = `
   # Resource Details
-  **URL**: ${selectedResource.url}
-  **Port**: ${selectedResource.port}
+  **URL**: ${selectedResource.url} **Port**: ${selectedResource.port}
   **Last Checked**: ${moment(selectedResource.lastChecked).fromNow()}
-  **Status**: ${selectedResource.status ? 'Up' : 'Down'}
-  
-  ## Uptime Chart
+  **Current Status**: ${selectedResource.status ? 'Up' : 'Down'}
   ![Uptime Chart](${chartUrl})
   `;
 

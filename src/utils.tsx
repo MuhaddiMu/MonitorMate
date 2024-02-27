@@ -132,7 +132,7 @@ export const commonPortsAndProtocols = {
 
 export const generateChartUrl = (statusHistory) => {
   const labels = statusHistory.map(entry => moment(entry.timestamp).format("h:mm A")); 
-  const data = statusHistory.map(entry => entry.status ? 1 : 0.1); // Use 0.1 for 'down' status to show a small red bar
+  const data = statusHistory.map(entry => entry.status ? 1 : 1); // Assigning 1 for 'up' status and 1 for 'down'
 
   // Assigning green color for 'up' status and red for 'down'
   const backgroundColors = statusHistory.map(entry => entry.status ? 'rgba(0, 255, 0, 0.5)' : 'rgba(255, 0, 0, 0.5)');
@@ -149,33 +149,33 @@ export const generateChartUrl = (statusHistory) => {
       }]
     },
     options: {
-      indexAxis: 'y', // Bars will be horizontal
+      indexAxis: 'x', 
       scales: {
         y: {
           beginAtZero: true,
           grid: {
-            display: false // Removes grid lines
-          }
+            display: true // Removes grid lines
+          },
         },
         x: {
-          beginAtZero: true, // Ensure that the scale starts at zero
+          beginAtZero: true, 
           grid: {
-            display: false // Removes grid lines
+            display: true 
           },
           ticks: {
-            display: false // Removes tick labels
+            display: true 
           }
         }
       },
       plugins: {
         legend: {
-          display: false // Removes the legend
-        }
+          display: true // Removes the legend
+        },
       }
     }
   };
 
-  const chartUrl = `https://quickchart.io/chart?c=${encodeURIComponent(JSON.stringify(chartConfig))}`;
-  console.log(chartUrl);
+  // rgba for dracula theme
+  const chartUrl = `https://quickchart.io/chart?c=${encodeURIComponent(JSON.stringify(chartConfig))}&width=500&height=200&v=4&bkg=rgba(55,35,85,0.5)`;
   return chartUrl;
 };
