@@ -75,12 +75,13 @@ export default function AddResource(props) {
 
     try {
       setIsFormLoading(true);
-      const newResource = { url, type, port, statusHistory: []};
+      const newResource = { url, type, port, statusHistory: [] };
 
       const isHostUp = await checkIfHostIsUp(newResource);
 
       newResource.status = isHostUp.status;
       newResource.lastChecked = isHostUp.lastChecked;
+      newResource.statusHistory = [{ status: isHostUp.status, timestamp: isHostUp.lastChecked }];
 
       if (newResource.status === false) {
         await showToast(Toast.Style.Failure, `Resource ${url} of type ${type} on port ${port} is not reachable`);
@@ -103,7 +104,7 @@ export default function AddResource(props) {
       if (error.message === "Resource with this URL and port already exists.") {
         await showToast(Toast.Style.Failure, "Duplicate Resource", error.message);
       } else {
-      await showToast(Toast.Style.Failure, "Failed to Add/Update Resource", error.message);
+        await showToast(Toast.Style.Failure, "Failed to Add/Update Resource", error.message);
       }
     } finally {
       setIsFormLoading(false);
@@ -116,7 +117,10 @@ export default function AddResource(props) {
       isLoading={isFormLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Add Resource" onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            title={typeof index === "number" ? "Update Resource" : "Add Resource"}
+            onSubmit={handleSubmit}
+          />
         </ActionPanel>
       }
     >

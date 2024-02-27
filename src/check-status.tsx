@@ -1,9 +1,11 @@
 // check-status.tsx
-import { showToast, Toast, LaunchProps, environment } from "@raycast/api";
+import { showToast, Toast, LaunchProps, environment, getPreferenceValues } from "@raycast/api";
 import { fetchResources, updateResourceList, checkIfHostIsUp, playSound } from "./utils";
 
 export default async function checkStatus(LaunchProps: LaunchProps) {
   const { launchType } = LaunchProps;
+
+  const { alertSound } = getPreferenceValues();
 
   try {
     const resources = await fetchResources();
@@ -42,8 +44,12 @@ export default async function checkStatus(LaunchProps: LaunchProps) {
 
         if (!statusResult.status && launchType === "userInitiated") {
           await showToast(Toast.Style.Failure, "Resource Unreachable", `Resource at ${resource.url} is not reachable.`);
-          playSound(`${environment.assetsPath}/alert.mp3`);
-        } else if (statusResult.status === false) {
+
+          // play sound when alertSound is true
+          if (alertSound) {
+            playSound(`${environment.assetsPath}/alert.mp3`);
+          }
+        } else if (statusResult.status === false && alertSound) {
           playSound(`${environment.assetsPath}/alert.mp3`);
         }
       } catch (error) {

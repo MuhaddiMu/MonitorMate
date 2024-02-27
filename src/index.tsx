@@ -8,14 +8,18 @@ export default function Command() {
   const [resources, setResources] = useState([]);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [selectedResource, setSelectedResource] = useState({});
+  const [isResourceLoading, setIsResourceLoading] = useState(false);
+
 
   useEffect(() => {
     loadResources();
   }, []);
 
   const loadResources = async () => {
+    setIsResourceLoading(true);
     const fetchedResources = await fetchResources();
     setResources(fetchedResources);
+    setIsResourceLoading(false);
   };
 
   const handleDelete = async (resource) => {
@@ -52,30 +56,60 @@ export default function Command() {
 
   if (isDetailsOpen && selectedResource) {
     const chartUrl = generateChartUrl(selectedResource.statusHistory);
-    const markdown = `
-  # Resource Details
-  **URL**: ${selectedResource.url} **Port**: ${selectedResource.port}
-  **Last Checked**: ${moment(selectedResource.lastChecked).fromNow()}
-  **Current Status**: ${selectedResource.status ? 'Up' : 'Down'}
-  ![Uptime Chart](${chartUrl})
-  `;
+    const markdownChart = `## Resource ${selectedResource.url}` +
 
+    `![Chart](${chartUrl})` 
     return (
       <Detail 
-        markdown={markdown} 
+        isLoading={!chartUrl}
+        markdown={markdownChart} 
+        navigationTitle={selectedResource.url + " Details"}
+        metadata={
+          <Detail.Metadata>
+            <Detail.Metadata.Label title="Resource URL" text={selectedResource.url} />
+            <Detail.Metadata.Label title="Port" text={selectedResource.port} />
+            <Detail.Metadata.Label title="Current Status" text={selectedResource.status ? "Up" : "Down"} icon={ { source: getStatusIcon(selectedResource.status), tintColor: selectedResource.status ? Color.Green : Color.Red } } />
+            <Detail.Metadata.Label title="Last Checked" text={moment(selectedResource.lastChecked).fromNow()} />
+            <Detail.Metadata.Separator />
+            <Detail.Metadata.Label title="Status History"
+              text={selectedResource.statusHistory.filter((status) => !status.status).length + " downtime in last 30 checks " + (selectedResource.statusHistory.filter((status) => !status.status).length > 0 ? " 😞" : " 😊")} />
+          </Detail.Metadata>
+        }
         actions={
           <ActionPanel>
-            <ActionPanel.Item title="Close" onAction={closeDetails} />
-            {/* Other actions if needed */}
+            <Action icon={Icon.XMarkCircleFilled} title="Close" onAction={closeDetails} />
+            <Action icon={Icon.Pencil} title="Edit" onAction={() => handleEdit(selectedResource)} />
+            <Action icon={Icon.Trash} title="Delete" onAction={() => handleDelete(selectedResource)} />
           </ActionPanel>
         }
       />
     );
   }
 
-  // Default list view
+
+  if (!isResourceLoading && resources.length === 0) {
+    return (
+      <List>
+        <List.Item
+          title="No resources found"
+          subtitle="Add a new resource to get started"
+          icon={Icon.PlusCircle}
+          actions={
+            <ActionPanel title="Add Resource">
+              <Action
+                icon={Icon.PlusCircle}
+                title="Add Resource"
+                onAction={() => launchCommand({ name: "add-resource", type: LaunchType.UserInitiated })}
+              />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+
   return (
-    <List navigationTitle="Search Resources">
+    <List navigationTitle="Search Resources" >
       {resources.map((resource, index) => (
         <List.Item
           key={index}
@@ -93,7 +127,7 @@ export default function Command() {
           ]}
           actions={
             <ActionPanel>
-              <ActionPanel.Item title="Details" onAction={() => handleDetails(resource)} />
+              <Action icon={Icon.Eye} title="Details" onAction={() => handleDetails(resource)} />
               <Action icon={Icon.Pencil} title="Edit" onAction={() => handleEdit(resource, index)} />
               <Action icon={Icon.Trash} title="Delete" onAction={() => handleDelete(resource)} />
             </ActionPanel>
@@ -102,4 +136,7 @@ export default function Command() {
       ))}
     </List>
   );
+
+ 
+
 }
