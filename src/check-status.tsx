@@ -1,6 +1,11 @@
 // check-status.tsx
 import { showToast, Toast, LaunchProps, environment, getPreferenceValues } from "@raycast/api";
-import { fetchResources, updateResourceList, checkIfHostIsUp, playSound } from "./utils";
+import { fetchResources, updateResourceList, isHostAvailable, playSound } from "./utils";
+
+interface StatusResult {
+  status: boolean;
+  lastChecked: string;
+}
 
 export default async function checkStatus(LaunchProps: LaunchProps) {
   const { launchType } = LaunchProps;
@@ -21,7 +26,7 @@ export default async function checkStatus(LaunchProps: LaunchProps) {
       console.log(`Checking resource: ${resource.url}`);
 
       try {
-        const statusResult = await checkIfHostIsUp(resource);
+        const statusResult = await isHostAvailable(resource) as StatusResult;
 
         let updatedStatusHistory = [
           ...resource.statusHistory,

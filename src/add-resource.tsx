@@ -1,11 +1,22 @@
 import { Form, ActionPanel, Action, showToast, environment, Toast, popToRoot } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { updateResourceList, checkIfHostIsUp, playSound, commonPortsAndProtocols } from "./utils";
+import { updateResourceList, isHostAvailable, playSound } from "./utils";
+import { commonPortsAndProtocols } from "./constants";
 
 interface Resource {
   url: string;
   type: string;
   port: string;
+  status?: boolean;
+  lastChecked?: string;
+  statusHistory: { status: boolean; timestamp: string }[];
+}
+
+interface Props {
+  launchContext?: {
+    resource?: Resource;
+    index?: number;
+  };
 }
 
 export default function AddResource(props) {
@@ -44,13 +55,13 @@ export default function AddResource(props) {
     setType(foundType || "other");
   };
 
-  const isValidUrl = (url) => {
+  const isValidUrl = (url: string) => {
     // You can add more complex URL validation here
     // return url.startsWith('http://') || url.startsWith('https://');
     return url.length > 0;
   };
 
-  const isValidPort = (port) => {
+  const isValidPort = (port: string) => {
     const portNum = parseInt(port);
     return portNum > 0 && portNum <= 65535;
   };
@@ -73,16 +84,17 @@ export default function AddResource(props) {
 
     if (!valid) return;
 
+
+    const newResource: Resource = { url, type, port, statusHistory: [] };
+
+    const isHostUp = await isHostAvailable(newResource) as { status: boolean; lastChecked: string}
+
+    newResource.status = isHostUp.status;
+    newResource.lastChecked = isHostUp.lastChecked;
+    newResource.statusHistory = [{ status: isHostUp.status, timestamp: isHostUp.lastChecked }];
+
     try {
       setIsFormLoading(true);
-      const newResource = { url, type, port, statusHistory: [] };
-
-      const isHostUp = await checkIfHostIsUp(newResource);
-
-      newResource.status = isHostUp.status;
-      newResource.lastChecked = isHostUp.lastChecked;
-      newResource.statusHistory = [{ status: isHostUp.status, timestamp: isHostUp.lastChecked }];
-
       if (newResource.status === false) {
         await showToast(Toast.Style.Failure, `Resource ${url} of type ${type} on port ${port} is not reachable`);
         playSound(`${environment.assetsPath}/alert.mp3`);
@@ -99,8 +111,7 @@ export default function AddResource(props) {
       );
 
       popToRoot();
-    } catch (error) {
-      setIsFormLoading(false);
+    } catch (error: unknown) {
       if (error.message === "Resource with this URL and port already exists.") {
         await showToast(Toast.Style.Failure, "Duplicate Resource", error.message);
       } else {
@@ -108,7 +119,6 @@ export default function AddResource(props) {
       }
     } finally {
       setIsFormLoading(false);
-      return;
     }
   };
 
@@ -134,9 +144,9 @@ export default function AddResource(props) {
       />
 
       <Form.Dropdown id="resourceType" title="Resource Type" value={type} onChange={setType}>
-        {Object.entries(commonPortsAndProtocols).map(([key, value]) => (
-          <Form.Dropdown.Item key={key} value={key} title={key} />
-        ))}
+      {Object.entries(commonPortsAndProtocols).map(([key]) => (
+        <Form.Dropdown.Item key={key} value={key} title={key} />
+      ))}
         <Form.Dropdown.Item value="other" title="Other" />
       </Form.Dropdown>
 

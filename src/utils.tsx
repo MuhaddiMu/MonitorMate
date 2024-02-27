@@ -12,6 +12,7 @@ export const fetchResources = async () => {
     return resources;
   } catch (error) {
     console.error("Failed to fetch resources:", error);
+    throw new Error("Failed to fetch resources.");
     return [];
   }
 };
@@ -25,9 +26,9 @@ export const updateResourceList = async (resource, index) => {
   }
 
   if (typeof index === "number") {
-    resources[index] = resource; // Update existing resource
+    resources[index] = resource; 
   } else {
-    resources.push(resource); // Add new resource
+    resources.push(resource); 
   }
 
   await LocalStorage.setItem("resources", JSON.stringify(resources));
@@ -40,7 +41,7 @@ export const deleteResource = async (resource) => {
 };
 
 const net = require("net");
-export const checkIfHostIsUp = async (resource) => {
+export const isHostAvailable = async (resource) => {
   return new Promise((resolve) => {
     const { url, port } = resource;
 
@@ -90,43 +91,6 @@ export const playSound = (filePath, volume = 1.0) => {
 
 // Example usage
 // playSound('/path/to/your/soundfile.wav', 0.5);
-
-export const commonPortsAndProtocols = {
-  http: 80,
-  https: 443,
-  ftp: 21,
-  ssh: 22,
-  telnet: 23,
-  smtp: 25,
-  dns: 53,
-  dhcp: 67,
-  tftp: 69,
-  "http-alt": 8080,
-  pop3: 110,
-  imap: 143,
-  ldap: 389,
-  "https-alt": 8443,
-  "microsoft-ds": 445,
-  mysql: 3306,
-  postgresql: 5432,
-  mssql: 1433,
-  rdp: 3389,
-  vnc: 5900,
-  snmp: 161,
-  "snmp-trap": 162,
-  ntp: 123,
-  "netbios-ns": 137,
-  "netbios-dgm": 138,
-  "netbios-ssn": 139,
-  ldap: 389,
-  ldaps: 636,
-  kerberos: 88,
-  kpasswd: 464,
-  kadmin: 749,
-  kpop: 1109,
-  knetd: 2053,
-  kshell: 544,
-};
 
 export const generateChartUrl = (statusHistory) => {
   const labels = statusHistory.map((entry) => moment(entry.timestamp).format("h:mm A"));
