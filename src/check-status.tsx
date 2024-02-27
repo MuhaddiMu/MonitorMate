@@ -2,10 +2,9 @@
 import { showToast, Toast, LaunchProps, environment } from "@raycast/api";
 import { fetchResources, updateResourceList, checkIfHostIsUp, playSound } from "./utils";
 
-
 export default async function checkStatus(LaunchProps: LaunchProps) {
-    const { launchType } = LaunchProps;
-    
+  const { launchType } = LaunchProps;
+
   try {
     const resources = await fetchResources();
 
@@ -22,15 +21,29 @@ export default async function checkStatus(LaunchProps: LaunchProps) {
       try {
         const statusResult = await checkIfHostIsUp(resource);
 
-        await updateResourceList({ ...resource, ...statusResult }, i);
+        let updatedStatusHistory = [
+          ...resource.statusHistory,
+          { status: statusResult.status, timestamp: statusResult.lastChecked },
+        ];
 
-        console.log(statusResult.status);
-        
+        const maxStatusHistory = 30;
+
+        if (updatedStatusHistory.length > maxStatusHistory) {
+          updatedStatusHistory = updatedStatusHistory.slice(-maxStatusHistory);
+        }
+
+        const updatedResource = {
+          ...resource,
+          ...statusResult,
+          statusHistory: updatedStatusHistory,
+        };
+
+        await updateResourceList(updatedResource, i);
 
         if (!statusResult.status && launchType === "userInitiated") {
           await showToast(Toast.Style.Failure, "Resource Unreachable", `Resource at ${resource.url} is not reachable.`);
           playSound(`${environment.assetsPath}/alert.mp3`);
-        } else if(statusResult.status === false ) {
+        } else if (statusResult.status === false) {
           playSound(`${environment.assetsPath}/alert.mp3`);
         }
       } catch (error) {
@@ -41,4 +54,3 @@ export default async function checkStatus(LaunchProps: LaunchProps) {
     console.error("Failed to check resources:", error);
   }
 }
-

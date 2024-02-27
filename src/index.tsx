@@ -1,11 +1,13 @@
-import { List, ActionPanel, Action, Color, Icon, launchCommand, LaunchType } from "@raycast/api";
+import { List, ActionPanel, Action, Color, Icon, launchCommand, LaunchType, Detail } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { fetchResources, deleteResource } from "./utils";
+import { fetchResources, deleteResource, generateChartUrl } from "./utils";
 import moment from "moment";
 
 
 export default function Command() {
   const [resources, setResources] = useState([]);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [selectedResource, setSelectedResource] = useState({});
 
   useEffect(() => {
     loadResources();
@@ -30,12 +32,51 @@ export default function Command() {
     });
   };
 
-  // Example of determining the status icon
+
+
+  const handleDetails = (resource) => {
+    setSelectedResource(resource);
+    setIsDetailsOpen(true);
+  };
+
+  const closeDetails = () => {
+    setIsDetailsOpen(false);
+    setSelectedResource(null);
+  };
+
+
   const getStatusIcon = (status) => {
     return status ? Icon.CircleFilled : Icon.XMarkCircleFilled;
   };
 
-  // Assume status is part of your resource object, indicating up or down
+
+  if (isDetailsOpen && selectedResource) {
+    const chartUrl = generateChartUrl(selectedResource.statusHistory);
+    const markdown = `
+  # Resource Details
+  **URL**: ${selectedResource.url}
+  **Port**: ${selectedResource.port}
+  **Last Checked**: ${moment(selectedResource.lastChecked).fromNow()}
+  **Status**: ${selectedResource.status ? 'Up' : 'Down'}
+  
+  ## Uptime Chart
+  ![Uptime Chart](${chartUrl})
+  `;
+
+    return (
+      <Detail 
+        markdown={markdown} 
+        actions={
+          <ActionPanel>
+            <ActionPanel.Item title="Close" onAction={closeDetails} />
+            {/* Other actions if needed */}
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
+  // Default list view
   return (
     <List navigationTitle="Search Resources">
       {resources.map((resource, index) => (
@@ -55,8 +96,9 @@ export default function Command() {
           ]}
           actions={
             <ActionPanel>
-              <Action icon={Icon.Trash} title="Delete" onAction={() => handleDelete(resource)} />
+              <ActionPanel.Item title="Details" onAction={() => handleDetails(resource)} />
               <Action icon={Icon.Pencil} title="Edit" onAction={() => handleEdit(resource, index)} />
+              <Action icon={Icon.Trash} title="Delete" onAction={() => handleDelete(resource)} />
             </ActionPanel>
           }
         />

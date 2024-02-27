@@ -1,6 +1,6 @@
 import { Form, ActionPanel, Action, showToast, environment, Toast, popToRoot } from "@raycast/api";
-import { useState } from "react";
-import { updateResourceList, checkIfHostIsUp, playSound } from "./utils";
+import { useState, useEffect } from "react";
+import { updateResourceList, checkIfHostIsUp, playSound, commonPortsAndProtocols } from "./utils";
 
 interface Resource {
   url: string;
@@ -18,6 +18,31 @@ export default function AddResource(props) {
   const [urlError, setUrlError] = useState("");
   const [portError, setPortError] = useState("");
   const [isFormLoading, setIsFormLoading] = useState(false);
+
+  useEffect(() => {
+    // Update the port only if the type is in commonPortsAndProtocols and different from the current port
+    if (type in commonPortsAndProtocols && commonPortsAndProtocols[type].toString() !== port) {
+      setPort(commonPortsAndProtocols[type].toString());
+    }
+    // Do not reset the port if the type is 'other'
+  }, [type]);
+
+  const handlePortChange = (newPort: string) => {
+    setPort(newPort); // Keep the entered port value
+    const portNum = parseInt(newPort, 10); // Parse the new port number
+    let foundType = null;
+
+    // Find the type that matches the port number
+    for (const [key, value] of Object.entries(commonPortsAndProtocols)) {
+      if (value === portNum) {
+        foundType = key;
+        break;
+      }
+    }
+
+    // Update the type if found, otherwise set to 'other'
+    setType(foundType || "other");
+  };
 
   const isValidUrl = (url) => {
     // You can add more complex URL validation here
@@ -50,7 +75,7 @@ export default function AddResource(props) {
 
     try {
       setIsFormLoading(true);
-      const newResource = { url, type, port };
+      const newResource = { url, type, port, statusHistory: []};
 
       const isHostUp = await checkIfHostIsUp(newResource);
 
@@ -58,11 +83,7 @@ export default function AddResource(props) {
       newResource.lastChecked = isHostUp.lastChecked;
 
       if (newResource.status === false) {
-        await showToast(
-          Toast.Style.Failure,
-          "Failed to Add/Update Resource",
-          `Resource ${url} of type ${type} on port ${port} is not reachable`,
-        );
+        await showToast(Toast.Style.Failure, `Resource ${url} of type ${type} on port ${port} is not reachable`);
         playSound(`${environment.assetsPath}/alert.mp3`);
         // return;
       }
@@ -79,14 +100,16 @@ export default function AddResource(props) {
       popToRoot();
     } catch (error) {
       setIsFormLoading(false);
+      if (error.message === "Resource with this URL and port already exists.") {
+        await showToast(Toast.Style.Failure, "Duplicate Resource", error.message);
+      } else {
       await showToast(Toast.Style.Failure, "Failed to Add/Update Resource", error.message);
+      }
     } finally {
       setIsFormLoading(false);
+      return;
     }
   };
-
-  // Make sure updateResourceList is defined somewhere in your code
-  // and is responsible for either adding or updating the resource in the list.
 
   return (
     <Form
@@ -105,16 +128,20 @@ export default function AddResource(props) {
         onChange={setURL}
         error={urlError}
       />
+
       <Form.Dropdown id="resourceType" title="Resource Type" value={type} onChange={setType}>
-        <Form.Dropdown.Item title="URL" value="URL" />
-        {/* Add other resource types as needed */}
+        {Object.entries(commonPortsAndProtocols).map(([key, value]) => (
+          <Form.Dropdown.Item key={key} value={key} title={key} />
+        ))}
+        <Form.Dropdown.Item value="other" title="Other" />
       </Form.Dropdown>
+
       <Form.TextField
         id="port"
         title="Port"
         value={port}
         placeholder="Enter the port number"
-        onChange={setPort}
+        onChange={handlePortChange}
         error={portError}
       />
     </Form>
