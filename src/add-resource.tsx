@@ -2,15 +2,7 @@ import { Form, ActionPanel, Action, showToast, environment, Toast, popToRoot } f
 import { useState, useEffect } from "react";
 import { updateResourceList, isHostAvailable, playSound } from "./utils";
 import { commonPortsAndProtocols } from "./constants";
-
-interface Resource {
-  url: string;
-  type: string;
-  port: string;
-  status?: boolean;
-  lastChecked?: string;
-  statusHistory: { status: boolean; timestamp: string }[];
-}
+import { Resource } from "./types";
 
 interface Props {
   launchContext?: {
@@ -31,8 +23,11 @@ export default function AddResource(props: Props) {
   const [isFormLoading, setIsFormLoading] = useState(false);
 
   useEffect(() => {
-    if (type in commonPortsAndProtocols && commonPortsAndProtocols[type].toString() !== port) {
-      setPort(commonPortsAndProtocols[type].toString());
+    if (
+      type in commonPortsAndProtocols &&
+      (commonPortsAndProtocols as Record<string, number>)[type].toString() !== port
+    ) {
+      setPort((commonPortsAndProtocols as Record<string, number>)[type].toString());
     }
     // Do not reset the port if the type is 'other'
   }, [type]);
@@ -100,7 +95,7 @@ export default function AddResource(props: Props) {
         // return;
       }
 
-      await updateResourceList(newResource, index);
+      await updateResourceList(newResource, index || -1);
 
       const action = typeof index === "number" ? "Updated" : "Added";
       await showToast(
@@ -110,11 +105,11 @@ export default function AddResource(props: Props) {
       );
 
       popToRoot();
-    } catch (error: unknown) {
-      if (error.message === "Resource with this URL and port already exists.") {
-        await showToast(Toast.Style.Failure, "Duplicate Resource", error.message);
+    } catch (error) {
+      if ((error as Error).message === "Resource with this URL and port already exists.") {
+        await showToast(Toast.Style.Failure, "Duplicate Resource", (error as Error).message);
       } else {
-        await showToast(Toast.Style.Failure, "Failed to Add/Update Resource", error.message);
+        await showToast(Toast.Style.Failure, "Failed to Add/Update Resource", (error as Error).message);
       }
     } finally {
       setIsFormLoading(false);
