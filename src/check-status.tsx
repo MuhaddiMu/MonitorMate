@@ -1,4 +1,3 @@
-// check-status.tsx
 import { showToast, Toast, LaunchProps, environment, getPreferenceValues } from "@raycast/api";
 import { fetchResources, updateResourceList, isHostAvailable, playSound } from "./utils";
 

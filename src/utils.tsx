@@ -2,6 +2,7 @@ import { LocalStorage } from "@raycast/api";
 import moment from "moment";
 import net from "net";
 import { exec } from "child_process";
+import { Resource } from "./types";
 
 export const fetchResources = async () => {
   try {
@@ -9,19 +10,18 @@ export const fetchResources = async () => {
     const storedResources = await LocalStorage.getItem("resources");
 
     // Parse the stored string back into an array
-    const resources = storedResources ? JSON.parse(storedResources) : [];
+    const resources = storedResources ? JSON.parse(String(storedResources)) : [];
 
     return resources;
   } catch (error) {
     console.error("Failed to fetch resources:", error);
     throw new Error("Failed to fetch resources.");
-    return [];
   }
 };
 
-export const updateResourceList = async (resource, index) => {
+export const updateResourceList = async (resource: Resource, index: number) => {
   const resources = (await fetchResources()) || [];
-  const existingIndex = resources.findIndex((r) => r.url === resource.url && r.port === resource.port);
+  const existingIndex = resources.findIndex((r: Resource) => r.url === resource.url && r.port === resource.port);
 
   if (existingIndex !== -1 && existingIndex !== index) {
     throw new Error("Resource with this URL and port already exists.");
@@ -36,13 +36,13 @@ export const updateResourceList = async (resource, index) => {
   await LocalStorage.setItem("resources", JSON.stringify(resources));
 };
 
-export const deleteResource = async (resource) => {
+export const deleteResource = async (resource: Resource) => {
   const resources = (await fetchResources()) || [];
-  const newResources = resources.filter((r) => r.url !== resource.url);
+  const newResources = resources.filter((r: Resource) => r.url !== resource.url);
   await LocalStorage.setItem("resources", JSON.stringify(newResources));
 };
 
-export const isHostAvailable = async (resource) => {
+export const isHostAvailable = async (resource: Resource) => {
   return new Promise((resolve) => {
     const { url, port } = resource;
 
@@ -51,7 +51,7 @@ export const isHostAvailable = async (resource) => {
 
     client.setTimeout(5000); // Set timeout to 5 seconds
 
-    client.connect(port, url, () => {
+    client.connect(parseInt(port), url, () => {
       client.end();
       resolve({ status: true, lastChecked });
     });
@@ -73,7 +73,7 @@ export const isHostAvailable = async (resource) => {
  * @param {string} filePath - The path to the sound file.
  * @param {number} volume - Volume level (0.0 to 1.0).
  */
-export const playSound = (filePath, volume = 1.0) => {
+export const playSound = (filePath: string, volume: number = 1.0) => {
   const command = `afplay "${filePath}" --volume ${volume}`;
 
   exec(command, (error, stdout, stderr) => {
@@ -91,7 +91,7 @@ export const playSound = (filePath, volume = 1.0) => {
 // Example usage
 // playSound('/path/to/your/soundfile.wav', 0.5);
 
-export const generateChartUrl = (statusHistory) => {
+export const generateChartUrl = (statusHistory: Resource["statusHistory"]) => {
   const labels = statusHistory.map((entry) => moment(entry.timestamp).format("h:mm A"));
   const data = statusHistory.map((entry) => (entry.status ? 1 : 1)); // Assigning 1 for 'up' status and 1 for 'down'
 

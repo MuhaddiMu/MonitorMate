@@ -25,7 +25,6 @@ export const commonPortsAndProtocols = {
   "netbios-ns": 137,
   "netbios-dgm": 138,
   "netbios-ssn": 139,
-  ldap: 389,
   ldaps: 636,
   kerberos: 88,
   kpasswd: 464,

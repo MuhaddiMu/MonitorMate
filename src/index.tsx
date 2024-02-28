@@ -2,14 +2,7 @@ import { List, ActionPanel, Action, Color, Icon, launchCommand, LaunchType, Deta
 import { useState, useEffect, useMemo } from "react";
 import { fetchResources, deleteResource, generateChartUrl } from "./utils";
 import moment from "moment";
-
-interface Resource {
-  url: string;
-  port: string;
-  status: boolean;
-  lastChecked: string;
-  statusHistory: { status: boolean; timestamp: string }[];
-}
+import { Resource } from "./types";
 
 export default function Command() {
   const [resources, setResources] = useState<Resource[]>([]);
@@ -97,7 +90,7 @@ export default function Command() {
               title="Current Status"
               text={selectedResource.status ? "Up" : "Down"}
               icon={{
-                source: getStatusIcon(selectedResource.status),
+                source: getStatusIcon(selectedResource.status ?? false),
                 tintColor: selectedResource.status ? Color.Green : Color.Red,
               }}
             />
@@ -137,7 +130,10 @@ export default function Command() {
       {resources.map((resource, index) => (
         <List.Item
           key={index}
-          icon={{ source: getStatusIcon(resource.status), tintColor: resource.status ? Color.Green : Color.Red }}
+          icon={{
+            source: getStatusIcon(resource.status ?? false),
+            tintColor: resource.status ? Color.Green : Color.Red,
+          }}
           title={resource.url}
           subtitle={`Port: ${resource.port}`}
           accessories={[
