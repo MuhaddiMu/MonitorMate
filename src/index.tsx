@@ -63,6 +63,25 @@ export default function Command() {
     return "";
   }, [selectedResource]);
 
+  const addResource = () => {
+    return (
+      <List.Item
+        title="Add Resource"
+        subtitle="Add a new resource to monitor"
+        icon={Icon.PlusCircle}
+        actions={
+          <ActionPanel title="Add Resource">
+            <Action
+              icon={Icon.PlusCircle}
+              title="Add Resource"
+              onAction={() => launchCommand({ name: "add-resource", type: LaunchType.UserInitiated })}
+            />
+          </ActionPanel>
+        }
+      />
+    );
+  };
+
   if (isDetailsOpen && selectedResource) {
     const chartUrl = generateChartUrl(selectedResource.statusHistory);
     return (
@@ -110,24 +129,7 @@ export default function Command() {
   }
 
   if (!isResourceLoading && resources.length === 0) {
-    return (
-      <List>
-        <List.Item
-          title="No resources found"
-          subtitle="Add a new resource to get started"
-          icon={Icon.PlusCircle}
-          actions={
-            <ActionPanel title="Add Resource">
-              <Action
-                icon={Icon.PlusCircle}
-                title="Add Resource"
-                onAction={() => launchCommand({ name: "add-resource", type: LaunchType.UserInitiated })}
-              />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
+    return <List>{addResource()}</List>;
   }
 
   return (
@@ -155,6 +157,8 @@ export default function Command() {
           }
         />
       ))}
+
+      {addResource()}
     </List>
   );
 }

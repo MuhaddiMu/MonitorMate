@@ -31,7 +31,6 @@ export default function AddResource(props: Props) {
   const [isFormLoading, setIsFormLoading] = useState(false);
 
   useEffect(() => {
-    // Update the port only if the type is in commonPortsAndProtocols and different from the current port
     if (type in commonPortsAndProtocols && commonPortsAndProtocols[type].toString() !== port) {
       setPort(commonPortsAndProtocols[type].toString());
     }
@@ -67,6 +66,7 @@ export default function AddResource(props: Props) {
   };
 
   const handleSubmit = async () => {
+    setIsFormLoading(true);
     let valid = true;
     if (!isValidUrl(url)) {
       setUrlError("Invalid URL. Please enter a valid URL.");
@@ -90,10 +90,10 @@ export default function AddResource(props: Props) {
 
     newResource.status = isHostUp.status;
     newResource.lastChecked = isHostUp.lastChecked;
+
     newResource.statusHistory = [{ status: isHostUp.status, timestamp: isHostUp.lastChecked }];
 
     try {
-      setIsFormLoading(true);
       if (newResource.status === false) {
         await showToast(Toast.Style.Failure, `Resource ${url} of type ${type} on port ${port} is not reachable`);
         playSound(`${environment.assetsPath}/alert.mp3`);
