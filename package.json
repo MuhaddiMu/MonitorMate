@@ -22,13 +22,12 @@
   "license": "MIT",
   "preferences": [
     {
-      "label": "Resource Label",
-      "default": true,
+      "label": "Play sound when a resource is down",
+      "default": false,
       "required": false,
       "name": "alertSound",
       "title": "Alert Sound",
       "type": "checkbox",
-      "defaultValue": "true",
       "description": "Play a sound when a resource is down"
     }
   ],
