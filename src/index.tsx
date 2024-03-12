@@ -114,7 +114,13 @@ export default function Command() {
               title="Edit"
               onAction={() => handleEdit(selectedResource, resources.indexOf(selectedResource))}
             />
-            <Action icon={Icon.Trash} title="Delete" onAction={() => handleDelete(selectedResource)} />
+            <Action
+              icon={Icon.Trash}
+              title="Delete"
+              style={Action.Style.Destructive}
+              onAction={() => handleDelete(selectedResource)}
+              shortcut={Keyboard.Shortcut.Common.Remove}
+            />
           </ActionPanel>
         }
       />
@@ -148,7 +154,13 @@ export default function Command() {
             <ActionPanel>
               <Action icon={Icon.Eye} title="Details" onAction={() => handleDetails(resource)} />
               <Action icon={Icon.Pencil} title="Edit" onAction={() => handleEdit(resource, index)} />
-              <Action icon={Icon.Trash} title="Delete" onAction={() => handleDelete(resource)} />
+              <Action
+                icon={Icon.Trash}
+                title="Delete"
+                onAction={() => handleDelete(resource)}
+                style={Action.Style.Destructive}
+                shortcut={Keyboard.Shortcut.Common.Remove}
+              />
             </ActionPanel>
           }
         />

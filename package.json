@@ -28,7 +28,6 @@
       "name": "alertSound",
       "title": "Alert Sound",
       "type": "checkbox",
-      "defaultValue": "true",
       "description": "Play a sound when a resource is down"
     }
   ],
@@ -36,6 +35,7 @@
     {
       "name": "index",
       "title": "Show Dashboard",
+      "subtitle": "MonitorMate",
       "subtitle": "See your Monitoring dashboard",
       "description": "See the status of all your monitoring resources",
       "mode": "view"
@@ -43,6 +43,7 @@
     {
       "name": "add-resource",
       "title": "Add Resource",
+      "subtitle": "MonitorMate",
       "subtitle": "Add a new resource to monitor",
       "description": "Add a new resource to monitor",
       "mode": "view"
@@ -50,6 +51,7 @@
     {
       "name": "check-status",
       "title": "Check Status",
+      "subtitle": "MonitorMate",
       "subtitle": "Check the status of a monitoring resources",
       "description": "Check the status of a monitoring resources",
       "mode": "no-view",
